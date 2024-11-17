@@ -16,6 +16,9 @@ class Exercise(models.Model):
         db_table = "exercises"
         ordering = ["name"]
 
+    def __str__(self):
+        return str(self.name)
+
 
 class Template(models.Model):
     name = models.CharField(max_length=255)
