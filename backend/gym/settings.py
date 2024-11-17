@@ -176,39 +176,30 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# JAZZMIN_SETTINGS = {
-#     "site_title": "Fitness Tracker Admin",
-#     "site_header": "Fitness Tracker",
-#     "site_brand": "Fitness Admin",
-#     "welcome_sign": "Welcome to the Fitness Tracker Admin Portal",
-#     "search_model": ["exercises.Exercise", "exercises.Template"],
-#     "topmenu_links": [
-#         {"name": "Home", "url": "admin:index"},
-#         {"name": "View Site", "url": "admin:exercises_exercise_changelist"},
-#     ],
-#     "show_sidebar": True,
-#     "navigation_expanded": True,
-#     "hide_apps": [],
-#     "hide_models": [],
-#     "order_with_respect_to": ["exercises"],
-#     "custom_links": {
-#         "exercises": [
-#             {
-#                 "name": "Exercise Statistics",
-#                 "url": "admin:exercises_exercise_changelist",
-#             }
-#         ]
-#     },
-#     "icons": {
-#         "exercises.Exercise": "fas fa-dumbbell",
-#         "exercises.Template": "fas fa-clipboard-list",
-#         "exercises.Session": "fas fa-calendar-check",
-#         "exercises.Set": "fas fa-layer-group",
-#     },
-#     "default_icon_parents": "fas fa-chevron-circle-right",
-#     "default_icon_children": "fas fa-circle",
-#     "related_modal_active": True,
-# }
+JAZZMIN_SETTINGS = {
+    "site_title": "Fitness Tracker Admin",
+    "site_header": "Fitness Tracker",
+    "site_brand": "Fitness Admin",
+    "welcome_sign": "Welcome to the Fitness Tracker Admin Portal",
+    "search_model": ["exercises.Exercise", "exercises.Template"],
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index"},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["exercises"],
+    "icons": {
+        "exercises.Exercise": "fas fa-dumbbell",
+        "exercises.Template": "fas fa-clipboard-list",
+        "exercises.Session": "fas fa-calendar-check",
+        "exercises.Set": "fas fa-layer-group",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": True,
+}
 
 # JAZZMIN_UI_TWEAKS = {
 #     "navbar_small_text": False,
