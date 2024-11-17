@@ -30,6 +30,9 @@ class Template(models.Model):
     class Meta:
         db_table = "templates"
 
+    def __str__(self):
+        return str(self.name)
+
 
 class Session(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -41,6 +44,9 @@ class Session(models.Model):
 
     class Meta:
         db_table = "sessions"
+
+    def __str__(self):
+        return str(str(self.user) + " - " + self.created_at.strftime("%Y-%m-%d"))
 
 
 class Set(models.Model):

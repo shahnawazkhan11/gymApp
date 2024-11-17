@@ -64,6 +64,13 @@ class TemplateAdmin(admin.ModelAdmin):
     exercise_count.short_description = "Exercises"
 
 
+class SetInline(admin.TabularInline):
+    model = Set
+    fields = ("exercise", "kg", "reps", "created_at")
+    readonly_fields = ("created_at",)
+    extra = 1  # Allows adding new sets directly from the session admin panel
+
+
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
     list_display = (
@@ -77,6 +84,7 @@ class SessionAdmin(admin.ModelAdmin):
     list_filter = ("completed_at", "created_at")
     search_fields = ("user__email", "user__username", "template__name", "note")
     readonly_fields = ("created_at", "updated_at")
+    inlines = [SetInline]  # Include the Set inline admin
 
     def template_name(self, obj):
         return obj.template.name if obj.template else "-"
