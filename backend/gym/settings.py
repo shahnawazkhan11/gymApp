@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import environ
+import environ 
 import os
 from datetime import timedelta
 
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "exercises",
     "measurements",
     "markdown",
+    "django_seed"
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -123,12 +124,14 @@ WSGI_APPLICATION = "gym.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+from dotenv import load_dotenv
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "gym",
         "USER": "postgres",
-        "PASSWORD": "",
+        "PASSWORD": os.getenv("PASSWORD"),
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -234,3 +237,5 @@ JAZZMIN_UI_TWEAKS = {
     },
     "actions_sticky_top": True,
 }
+
+
