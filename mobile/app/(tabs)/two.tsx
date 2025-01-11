@@ -22,10 +22,48 @@ export default function TabTwoScreen() {
     rightThigh: '',
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Handle optional fields here
     console.log('Submitting measurements:', measurements);
-    // Add your API call here
+    
+    try {
+      const response = await fetch('http://10.0.2.2:8000/api/measurements/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          weight: measurements.weight,
+          weight_unit: 'kg', // Assuming weight is in kg
+          measurements: {
+            neck: measurements.neck,
+            shoulders: measurements.shoulders,
+            leftBicep: measurements.leftBicep,
+            rightBicep: measurements.rightBicep,
+            leftTricep: measurements.leftTricep,
+            rightTricep: measurements.rightTricep,
+            leftForearm: measurements.leftForearm,
+            rightForearm: measurements.rightForearm,
+            upperAbs: measurements.upperAbs,
+            waist: measurements.waist,
+            hips: measurements.hips,
+            leftCalf: measurements.leftCalf,
+            rightCalf: measurements.rightCalf,
+            leftThigh: measurements.leftThigh,
+            rightThigh: measurements.rightThigh,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log('Success:', data);
+    } catch (error) {
+      console.error('Error submitting measurements:', error);
+    }
   };
 
   return (

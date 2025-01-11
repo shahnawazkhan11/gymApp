@@ -50,9 +50,9 @@ INSTALLED_APPS = [
     "django_filters",
     "users",
     "exercises",
-    "measurements",
     "markdown",
-    "django_seed"
+    "django_seed",
+    "stats",
 ]
 
 AUTH_USER_MODEL = "users.User"
