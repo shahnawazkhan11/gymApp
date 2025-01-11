@@ -7,6 +7,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Exercise
 from .serializers import ExerciseSerializer
 from .filters import ExerciseFilter
+from rest_framework.permissions import AllowAny
 
 
 class ExerciseViewSet(viewsets.ModelViewSet):
@@ -18,6 +19,7 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["name", "bodypart", "equipment", "created_at"]
     ordering = ["name"]
+    permission_classes = [AllowAny] 
 
     def get_queryset(self):
         queryset = super().get_queryset()
