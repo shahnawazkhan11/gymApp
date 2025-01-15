@@ -1,24 +1,22 @@
 from rest_framework import serializers
-from .models import Exercise
-
+from .models import Exercise, Template, Session, Set
 
 class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercise
-        fields = [
-            "id",
-            "name",
-            "description",
-            "bodypart",
-            "equipment",
-            "difficulty",
-            "tags",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["created_at", "updated_at"]
+        fields = '__all__'
 
-    def validate_tags(self, value):
-        if not isinstance(value, list):
-            raise serializers.ValidationError("Tags must be a list")
-        return value
+class TemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Template
+        fields = '__all__'
+
+class SessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Session
+        fields = '__all__'
+
+class SetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Set
+        fields = '__all__'
