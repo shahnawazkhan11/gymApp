@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 
@@ -16,9 +16,19 @@ interface Exercise {
 }
 
 interface Template {
-  id: string;
+  id: number;
   name: string;
-  exercises: Exercise[];
+  exercises: number[];
+}
+
+interface APIExercise {
+  id: number;
+  name: string;
+  equipment: string;
+  description: string;
+  bodypart: string;
+  difficulty: string;
+  tags: string[];
 }
 
 const WorkoutScreen = () => {
@@ -26,39 +36,68 @@ const WorkoutScreen = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState('');
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [availableExercises, setAvailableExercises] = useState<APIExercise[]>([]);
 
-  // Predefined templates
-  const templates: Template[] = [
-    {
-      id: '1',
-      name: 'Push Day',
-      exercises: [
-        { name: 'Bench Press', equipment: 'Barbell', sets: [{ previous: '', kg: '', reps: '10', confirmed: false }] },
-        { name: 'Shoulder Press', equipment: 'Dumbbell', sets: [{ previous: '', kg: '', reps: '10', confirmed: false }] },
-      ]
-    },
-    {
-      id: '2',
-      name: 'Pull Day',
-      exercises: [
-        { name: 'Lateral Raise', equipment: 'Dumbbell', sets: [{ previous: '', kg: '', reps: '10', confirmed: false }] },
-        { name: 'Skullcrusher', equipment: 'Barbell', sets: [{ previous: '', kg: '', reps: '10', confirmed: false }] },
-      ]
-    },
-  ];
+  // Fetch exercises from API
+  const fetchExercises = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/api/exercises/');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setAvailableExercises(data.results);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    }
+  };
 
-  const exerciseOptions = [
-    { label: 'Lateral Raise (Dumbbell)', value: 'Lateral Raise', equipment: 'Dumbbell' },
-    { label: 'Skullcrusher (Barbell)', value: 'Skullcrusher', equipment: 'Barbell' },
-    { label: 'Bench Press (Barbell)', value: 'Bench Press', equipment: 'Barbell' },
-    { label: 'Shoulder Press (Dumbbell)', value: 'Shoulder Press', equipment: 'Dumbbell' },
-  ];
+  // Fetch templates from API
+  const fetchTemplates = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/api/templates/');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setTemplates(data.results);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchExercises();
+    fetchTemplates();
+  }, []);
+
+  // Convert API exercises to dropdown format
+  const exerciseOptions = availableExercises.map(exercise => ({
+    label: `${exercise.name} (${exercise.equipment})`,
+    value: exercise.id.toString(),
+    equipment: exercise.equipment
+  }));
 
   const handleTemplateSelect = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = templates.find(t => t.id.toString() === templateId);
     if (template) {
       setSelectedTemplate(templateId);
-      setExercises(template.exercises);
+      
+      // Convert template exercise IDs to full exercise objects
+      const templateExercises = template.exercises.map(exerciseId => {
+        const apiExercise = availableExercises.find(ex => ex.id === exerciseId);
+        if (apiExercise) {
+          return {
+            name: apiExercise.name,
+            equipment: apiExercise.equipment,
+            sets: [{ previous: '', kg: '', reps: '10', confirmed: false }]
+          };
+        }
+        return null;
+      }).filter((ex): ex is Exercise => ex !== null);
+
+      setExercises(templateExercises);
     }
   };
 
@@ -71,17 +110,18 @@ const WorkoutScreen = () => {
       return;
     }
 
-    const selectedOption = exerciseOptions.find(opt => opt.value === selectedExercise);
-    if (selectedOption) {
+    const selectedApiExercise = availableExercises.find(ex => ex.id.toString() === selectedExercise);
+    if (selectedApiExercise) {
       setExercises([...exercises, {
-        name: selectedOption.value,
-        equipment: selectedOption.equipment,
+        name: selectedApiExercise.name,
+        equipment: selectedApiExercise.equipment,
         sets: [{ previous: '', kg: '', reps: '10', confirmed: false }]
       }]);
     }
     setSelectedExercise('');
   };
 
+  // Rest of the component remains the same
   const addSet = (exerciseIndex: number) => {
     const updatedExercises = [...exercises];
     const lastSet = updatedExercises[exerciseIndex].sets[updatedExercises[exerciseIndex].sets.length - 1];
@@ -104,14 +144,57 @@ const WorkoutScreen = () => {
     setExercises(exercises.filter((_, i) => i !== index));
   };
 
-  const finishWorkout = () => {
-    // Add logic to save workout data
-    Alert.alert('Workout Completed', 'Your workout has been saved!');
-    setWorkoutStarted(false);
-    setExercises([]);
-    setSelectedTemplate('');
+  const finishWorkout = async () => {
+    try {
+      // First, let's log what we're sending
+      const workoutData = {
+        template: selectedTemplate ? parseInt(selectedTemplate) : null,
+        workout_exercises: exercises.map((exercise, index) => ({
+          exercise: availableExercises.find(ex => ex.name === exercise.name)?.id,
+          order: index,
+          workout_sets: exercise.sets.map((set, setIndex) => ({
+            weight: parseFloat(set.kg) || 0,
+            reps: parseInt(set.reps) || 0,
+            completed: set.confirmed,
+            order: setIndex
+          }))
+        }))
+      };
+  
+      console.log('Sending workout data:', JSON.stringify(workoutData, null, 2));
+  
+      const response = await fetch('http://10.0.2.2:8000/api/workouts/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workoutData)
+      });
+  
+      // Log the full response
+      const responseData = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response data:', responseData);
+  
+      if (!response.ok) {
+        throw new Error(JSON.stringify(responseData) || 'Failed to save workout');
+      }
+  
+      Alert.alert('Success', 'Workout saved successfully!');
+      setWorkoutStarted(false);
+      setExercises([]);
+      setSelectedTemplate('');
+  
+    } catch (error) {
+      console.error('Full error:', error);
+      // Show more detailed error message
+      Alert.alert(
+        'Error', 
+        typeof error.message === 'string' ? error.message : 'Failed to save workout. Check console for details.'
+      );
+    }
   };
-
+      
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="p-4">
@@ -119,7 +202,7 @@ const WorkoutScreen = () => {
           <View>
             <Text className="text-xl font-bold mb-4">Select Workout Template</Text>
             <Dropdown
-              data={templates.map(template => ({ label: template.name, value: template.id }))}
+              data={templates.map(template => ({ label: template.name, value: template.id.toString() }))}
               labelField="label"
               valueField="value"
               placeholder="Select Template"

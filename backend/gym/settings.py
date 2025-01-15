@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "markdown",
     "django_seed",
     "stats",
+    "workouts",
 ]
 
 AUTH_USER_MODEL = "users.User"
